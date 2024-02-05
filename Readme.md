@@ -4,6 +4,8 @@ This is a sentiment analysis project created using a product reviews dataset giv
 
 ### Data analysis
 
+I have deployed a [streamlit app](https://reviewsentimentaakash.streamlit.app/) so that anyone can perform the analysis by selecting a product category.
+
 I did a thorough data analysis to understand the underlying patterns so as to take decisions while modelling. Below are some plots which make it easier to understand this data.
 
 Rating Distribution | Review length distribution | Review length by rating boxplot
