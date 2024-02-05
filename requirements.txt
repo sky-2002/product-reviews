@@ -1,0 +1,14 @@
+imbalanced_learn==0.12.0
+joblib==1.3.2
+lancedb
+lime==0.2.0.1
+matplotlib==3.5.3
+nltk==3.8.1
+numpy
+pandas
+plotly
+scikit_learn
+seaborn
+https://github.com/UKPLab/sentence-transformers/archive/master.zip
+umap_learn
+vectorizers
