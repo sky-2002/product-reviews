@@ -84,12 +84,12 @@ def review_length_by_category_by_label(category):
               annotation_textangle = 90, annotation_position='left')
     return fig
 
-@st.cache_data
-def rating_distribution_of_category_over_time(category):
-    data = categorized[categorized['categories']==category]
-    gb = pd.DataFrame(data.groupby('year')).reset_index()
-    # fig = px.bar(data_frame=gb, x='year', y='rating')
-    return gb
+# @st.cache_data
+# def rating_distribution_of_category_over_time(category):
+#     data = categorized[categorized['categories']==category]
+#     gb = pd.DataFrame(data.groupby('year')).reset_index()
+#     # fig = px.bar(data_frame=gb, x='year', y='rating')
+#     return gb
 
 @st.cache_data
 def review_length_average_over_time():
@@ -97,6 +97,11 @@ def review_length_average_over_time():
     fig = px.line(v, x='year', y='review_word_count', color='sentiment', color_discrete_sequence=['red', 'blue'])
     return fig
 
+@st.cache_data
+def negative_reviews_by_category(category, num_reviews):
+    df = categorized[categorized['categories']==category]
+    wr = df[df['hypothesis_label']=='negative'].sort_values(by='review_word_count', ascending=False)[:num_reviews]['reviews']
+    return wr
 
 category: str = st.selectbox(label="Select category of product", options=categorized['categories'].unique())
 st.write(f"Number of product in our dataset for this category - {len(categorized[categorized['categories']==category])}")
@@ -132,6 +137,9 @@ st.plotly_chart(fig3, use_container_width=True)
 fig4 = review_length_average_over_time()
 fig4.update_layout(yaxis_title="Average number of words in review")
 st.plotly_chart(fig4, use_container_width=True)
+
+nr = st.number_input(label="Enter number of reviews to check", min_value=0, max_value=len(categorized[(categorized['categories']==category) & (categorized['hypothesis_label']=='negative')]))
+st.dataframe(negative_reviews_by_category(category, nr).values, use_container_width=True)
 
 
 # fig3 = low_rating_categories()
