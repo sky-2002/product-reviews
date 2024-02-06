@@ -48,7 +48,18 @@ Linear SVM with all-Mini embeddings | Linear SVM with Nomic embeddings
 ------------------------------------|----------------------------------
 ![all-mini](./images/linear_svm_smote_allmini.png) | ![nomic](./images/linear_svm_nomic_cm.png)
 
-These are the model performances, I have done many experiments, putting some of them here.
+
+### Comparison of model performance with pre-trained models
+
+Nomic embedding and SMOTE based Linear SVM | Flair Sentiment analysis pre-trained model
+-------------------------------------------|-------------------------------------------
+![nomic smote perf](./images/nomic_smote_perf.png) | ![flair perf](./images/flair_perf.png)
+
+This comparison shows that our linear SVM is at par with the pre-trained Flair model, which is based on distilBERT. In fact, our model has **`8% more recall`** on the `negative` class than the pre-trained model. 
+
+Note: Inference using the Flair model was performed on Google colab with T4 GPU.
+
+These are the model performances, I did many experiments while creating this repo, putting some of them here.
 
 Model | Accuracy | Precision | Recall | F1-Score
 ------|----------|-----------|--------|----------
