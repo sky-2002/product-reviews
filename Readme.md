@@ -2,6 +2,11 @@
 
 This is a sentiment analysis project created using a product reviews dataset given [here](https://gfc.target.com/cmsti/f46a7ece-a8d2-4c71-a5ef-1cc9c3df8e3e.xlsx). It includes product information and ratings and reviews given by users. I have assumed review score less than 3 to be negative and greater than 3 to be positive on a scale of 5. This makes it an imbalanced dataset.
 
+### Udates 
+- Feb 10, 2024
+    - I have added summarization option for reviews using `LaMini-Flan-T5-248M` model. Now we can see summaries of long reviews to extract crisp information and get better insight from summary itself.
+    This would make it easier to understand the issues without the need to scroll through entire review.
+
 ### Data analysis
 
 I have deployed a [streamlit app](https://reviewsentimentaakash.streamlit.app/) so that anyone can perform the analysis by selecting a product category.
@@ -14,7 +19,8 @@ Rating Distribution | Review length distribution | Review length by rating boxpl
 
 Based on the above rating distribution, I had made an assumption that rating less than equal to 3 will be considered a negative review. And hence the other two plots.
 
-### Modelling
+### Sentiment Analysis
+#### <u>Modelling</u>
 
 Initially, I have resorted to `sklearn` models as they are easier to interpret. I started with simple feature extraction methods and built upon the results to improve.
 
@@ -31,7 +37,7 @@ We can see from the confusion matrix that metrics(expecially recall) on the `neg
 
 But using term frequency or TF-IDF was not sufficient, as the results were still not as good as can be used for a real world use case. 
 
-### Improving performance
+#### <u>Improving performance</u>
 
 I considered using `sentence-transformer` models to get embeddings for reviews and then use these embeddings as features to `sklearn` models.
 I experimented with two models - `all-MiniLM-L6-v2` and `nomic-embed-text-v1`. Used LanceDB to compute and store these embeddings.
@@ -49,7 +55,7 @@ Linear SVM with all-Mini embeddings | Linear SVM with Nomic embeddings
 ![all-mini](./images/linear_svm_smote_allmini.png) | ![nomic](./images/linear_svm_nomic_cm.png)
 
 
-### Comparison of model performance with pre-trained models
+#### <u>Comparison of model performance with pre-trained models</u>
 
 Nomic embedding and SMOTE based Linear SVM | Flair Sentiment analysis pre-trained model
 -------------------------------------------|-------------------------------------------
@@ -69,3 +75,15 @@ Linear_SVM_SMOTE_Embeddings | 0.8024 | 0.9228  | 0.8024 | 08464
 Linear_SVM_Nomic_SMOTE | 0.8952 | 0.9402 | 0.8952 | 0.9114
 
 ### Note: This is a work in progress(hence the WIP). I will keep updating this repository as I do more analysis.
+
+### Planned features
+- A better UI
+    - Needs to be smooth and good-looking. Need some streamlit and CSS hacks.
+    - Need better organization of the figures and elements.
+- Query product review
+    - I am planning to add a method to get all useful comments for a particular product by querying all the reviews for that product. 
+    - This would help understand the reviews better than just summarizing them. For example, if I ask "How is the after-sales service for this product?", this method should give me all those reviews(or their summary) that talk about "after-sales service".
+- Make the streamlit app modular
+    - I had started with limited features and hence wrote everything in the `app.py` file. Need to shift methods to files and modules.
+    - Organize modules into ones those transform data, visualizers, AI related etc.
+
