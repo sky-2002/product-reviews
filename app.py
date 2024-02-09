@@ -1,4 +1,5 @@
 import streamlit as st
+from langchain.text_splitter import CharacterTextSplitter
 st.set_page_config(layout="wide")
 
 st.title('Product reviews sentiment analysis')
@@ -97,11 +98,41 @@ def reviews_by_category(category, sentiment, num_reviews):
     wr = df[df['hypothesis_label']==sentiment].sort_values(by='review_word_count', ascending=False)[:num_reviews]['reviews']
     return wr
 
+@st.cache_resource
+def get_summarization_pipeline():
+    from transformers import T5Tokenizer, T5ForConditionalGeneration, pipeline
+    import torch
+    
+    checkpoint = "MBZUAI/LaMini-Flan-T5-248M"
+    tokenizer = T5Tokenizer.from_pretrained(checkpoint)
+    model = T5ForConditionalGeneration.from_pretrained(checkpoint, device_map="auto", torch_dtype=torch.float32)
+
+    return pipeline(task="summarization", model=model, tokenizer=tokenizer, max_length=200, min_length=50)
+
+@st.cache_data
+def generate_summary(reviews):
+    pipe = get_summarization_pipeline()
+
+    summaries_result = pipe(reviews)
+    return [sum_res['summary_text'] for sum_res in summaries_result]
+
 
 category: str = st.selectbox(label="Select category of product", options=categorized['categories'].unique())
 st.write(f"Number of product in our dataset for this category - {len(categorized[categorized['categories']==category])}")
 
 col1, col2 = st.columns(2)
+
+# Adding a simple text splitter initially, working on a better approach 
+# for longer reviews
+def splitter(texts):
+    res = []
+    for t in texts:
+        if len(t.split())<512:
+            res.append(t)
+        else:
+            res.append(" ".join(t.split()[:512]))
+    return res
+
 
 height = 600
 width = 600
@@ -118,7 +149,33 @@ with col1:
                           min_value=0, 
                           max_value=len(categorized[(categorized['categories']==category) & (categorized['hypothesis_label']=='negative')]),
                           key=1)
-    st.dataframe(reviews_by_category(category, 'negative', nr1).values, use_container_width=True)
+    negative_reviews = reviews_by_category(category, 'negative', nr1).values
+    st.dataframe(negative_reviews, use_container_width=True)
+
+   
+    nbt = st.checkbox(label="Generate summary of negative reviews")
+    if nbt:
+        # Display summaries in a more organized way
+        if "negative_summaries" not in st.session_state:
+            st.session_state["negative_summaries"] = generate_summary(splitter(list(negative_reviews)))
+        st.session_state.negative_summaries = generate_summary(splitter(list(negative_reviews)))
+        st.write("## Summaries")
+        
+        container1 = st.container()
+        
+        c1, c2 = st.columns(2)
+
+        # Display summaries in a more organized way
+        with container1:
+            for i, summary in enumerate(st.session_state.negative_summaries, start=1):
+                if i%2==1:
+                    with c1:
+                        st.text_area(label=f"### Review {i} Summary", value=f"{summary}")
+
+                elif i%2==0:
+                    with c2:
+                        st.text_area(label=f"### Review {i} Summary", value=f"{summary}")
+        
 
 with col2:
     worst_prod = least_rating_products_by_category(category)
@@ -133,14 +190,38 @@ with col2:
                           min_value=0, 
                           max_value=len(categorized[(categorized['categories']==category) & (categorized['hypothesis_label']=='positive')]),
                           key=2)
-    st.dataframe(reviews_by_category(category, 'positive', nr2).values, use_container_width=True)
+    positive_reviews = reviews_by_category(category, 'positive', nr2).values
+    st.dataframe(positive_reviews, use_container_width=True)
 
+
+    pbt = st.checkbox(label="Generate summary of positive reviews")
+    if pbt:
+        # Display summaries in a more organized way
+        if "positive_summaries" not in st.session_state:
+            st.session_state["positive_summaries"] = generate_summary(splitter(list(positive_reviews)))
+        st.session_state.positive_summaries = generate_summary(splitter(list(positive_reviews)))
+        st.write("## Summaries")
+        
+        container2 = st.container()
+        
+        c3, c4 = st.columns(2)
+
+        # Display summaries in a more organized way
+        with container2:
+            for i, summary in enumerate(st.session_state.positive_summaries, start=1):
+                if i%2==1:
+                    with c3:
+                        st.text_area(label=f"### Review {i} Summary", value=f"{summary}")
+
+                elif i%2==0:
+                    with c4:
+                        st.text_area(label=f"### Review {i} Summary", value=f"{summary}")
+        
 
 
 st.write("Please autoscale from top right corner of figure because figure is getting squeezed for some categories")
 fig3 = review_length_by_category_by_label(category)
-fig3.update_layout(height=height, width=width, 
-                   xaxis_title="Number of words in review", yaxis_title="Frequency")
+fig3.update_layout(height=height, width=width, xaxis_title="Number of words in review", yaxis_title="Frequency")
 st.plotly_chart(fig3, use_container_width=True)
 
 fig4 = review_length_average_over_time()
