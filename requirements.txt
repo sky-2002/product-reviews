@@ -9,6 +9,7 @@ pandas
 plotly
 scikit_learn
 seaborn
+transformers
 https://github.com/UKPLab/sentence-transformers/archive/master.zip
 umap_learn
 vectorizers
