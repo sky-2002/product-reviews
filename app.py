@@ -1,5 +1,5 @@
 import streamlit as st
-from langchain.text_splitter import CharacterTextSplitter
+
 st.set_page_config(layout="wide")
 
 st.title('Product reviews sentiment analysis')
